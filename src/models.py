@@ -40,9 +40,9 @@ class Character(Base):
     created = Column(String(50), nullable=False)
     edited = Column(String(50), nullable=False)
     homeworld_id = Column(Integer, ForeignKey('planet.id'), nullable=True)
-    films = Column(String(500), nullable=True)
-    starships = Column(String(500), nullable=True)
-    vehicles = Column(String(500), nullable=True)
+    films = relationship("CharacterFilm", back_populates="character")
+    vehicles = relationship("CharacterVehicle", back_populates="character")
+    starships = relationship("CharacterStarship", back_populates="character")
     homeworld = relationship("Planet")
 
     def to_dict(self):
@@ -141,6 +141,7 @@ class Starship(Base):
     starship_class = Column(String(250), nullable=True)
     created = Column(String(50), nullable=False)
     edited = Column(String(50), nullable=False)
+    characters = relationship("CharacterStarship", back_populates="starship")
 
     def to_dict(self):
         return {
@@ -178,6 +179,7 @@ class Vehicle(Base):
     vehicle_class = Column(String(250), nullable=True)
     created = Column(String(50), nullable=False)
     edited = Column(String(50), nullable=False)
+    characters = relationship("CharacterVehicle", back_populates="vehicle")
 
     def to_dict(self):
         return {
@@ -206,6 +208,7 @@ class Film(Base):
     release_date = Column(String(50), nullable=True)
     created = Column(String(50), nullable=False)
     edited = Column(String(50), nullable=False)
+    characters = relationship("CharacterFilm", back_populates="film")
 
     def to_dict(self):
         return {
@@ -244,6 +247,30 @@ class Favorite(Base):
             "vehicle_id": self.vehicle_id,
             "film_id": self.film_id
         }
+
+class CharacterFilm(Base):
+    __tablename__ = 'characterfilm'
+    id = Column(Integer, primary_key=True)
+    character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
+    film_id = Column(Integer, ForeignKey('film.id'), nullable=False)
+    character = relationship("Character", back_populates="films")
+    film = relationship("Film", back_populates="characters")
+
+class CharacterVehicle(Base):
+    __tablename__ = 'charactervehicle'
+    id = Column(Integer, primary_key=True)
+    character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=False)
+    character = relationship("Character", back_populates="vehicles")
+    vehicle = relationship("Vehicle", back_populates="characters")
+
+class CharacterStarship(Base):
+    __tablename__ = 'characterstarship'
+    id = Column(Integer, primary_key=True)
+    character_id = Column(Integer, ForeignKey('character.id'), nullable=False)
+    starship_id = Column(Integer, ForeignKey('starship.id'), nullable=False)
+    character = relationship("Character", back_populates="starships")
+    starship = relationship("Starship", back_populates="characters")
 
 ## Draw from SQLAlchemy base
 render_er(Base, 'diagram.png')
